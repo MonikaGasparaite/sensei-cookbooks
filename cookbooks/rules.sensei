@@ -4,7 +4,7 @@
     "description": "cookbook for internal use within our company",
     "company": "SCW",
     "appsecmail": "appsecteam@senseifinancial.com",
-    "rulepack_id": "a4fd95e8-3e2b-4754-a06b-7c2316b54740",
+    "rulepack_id": "37085da3-a838-4471-b04e-64ccbfaf622a",
     "rulePackVersion": "0.1.0",
     "enabled": true
   },
@@ -12,13 +12,150 @@
     {
       "type": "947034909c9b08d0b583170e594b0eb327933231",
       "model": {
-        "yamlCode": "search:\n  methodcall:\n    name: \"println\"\n    \"on\":\n      field:\n        in:\n          class:\n            name: \"java.lang.System\"\n        name: \"out\"\nscopes: {}\n",
+        "yamlCode": "search:\n  typeDeclaration:\n    with:\n      child:\n        annotation:\n          type: org.junit.jupiter.api.Test\n    modifier: public\n",
         "mver": 8,
-        "yamlQuickFixCode": "availableFixes:\n- name: \"Use logger\"\n  actions:\n  - rewrite:\n      to: \"log.info({{{ argumentList.expressions }}})\"\n",
-        "ruleName": "Logging: Enforce java.util.logging",
-        "ruleID": "be38874d-be43-4a39-beae-dbb32abe0d84",
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Remove @Test class public visibility\"\n  actions:\n  - changeModifiers:\n      visibility: \"\"\n",
+        "ruleName": "Tests: Test classes  do not need to be public",
+        "ruleID": "7c262a8c-d2ad-41e2-b4ea-50f37129d85b",
         "disableRuleIDs": [],
-        "ruleShortDescription": "Do not use System.out.println to write log statements",
+        "ruleShortDescription": "Test classes do not need public visibility",
+        "ruleErrorLevel": 2,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  typeDeclaration:\n    allOf:\n    - child:\n        method:\n          modifier: \"static\"\n    not:\n      with:\n        child:\n          method:\n            constructor: true\n            parameters: {}\n    without:\n      annotation:\n        type: \"lombok.NoArgsConstructor\"\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"add private constructor\"\n  actions:\n  - addAnnotation:\n      annotation: \"@NoArgsConstructor(access \u003d AccessLevel.PRIVATE)\"\n",
+        "ruleName": "Refactor: Create private constructor",
+        "ruleID": "f6e35e21-6f5b-4d07-8496-a97070f95d03",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "create a private constructor for static classes",
+        "ruleErrorLevel": 2,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  method:\n    annotation:\n      type: org.junit.jupiter.api.Test\n    modifier: public\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n  - name: \"Remove @Test method public visibility\"\n    actions:\n      - changeModifiers:\n          visibility: \"\"\n",
+        "ruleName": "Tests: Test methods do not need to be public",
+        "ruleID": "510f6589-d609-49a4-b6a9-c9fefcaeea14",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "Test methods do not need public visibility",
+        "ruleErrorLevel": 1,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  field:\n    not:\n      in:\n        typeDeclaration:\n          with:\n            child:\n              method:\n                name: \"get{{{markedElement.name}}}\"\n    modifier: \"public\"\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Create getter and make private\"\n  actions:\n  - addMethod:\n      method: \"public final {{{markedElement.typeElement}}} get{{#upperCaseFirst}}{{{markedElement.name}}}{{/upperCaseFirst}}(){\\n\\\n        \\   return {{{markedElement.name}}};\\n}\"\n      target: \"parentClass\"\n  - changeModifiers:\n      visibility: \"private\"\n",
+        "ruleName": "Refactor: Use a getter rather than public field",
+        "ruleID": "850cb607-579d-4dae-8d0e-3e683015d698",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "Do not use direct field access",
+        "ruleErrorLevel": 1,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  method:\n    annotation:\n      type: \"org.junit.jupiter.api.Test\"\n    name:\n      not:\n        contains: \"test\"\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Add test prefixt to test method\"\n  actions:\n  - rewrite:\n      to: \"{{{ annotations }}}\\nvoid {{{markedElement.typeElement}}}test{{#upperCaseFirst}}{{{markedElement.name}}}{{/upperCaseFirst}}()\\\n        \\ {\\n{{{ body.statements }}}\\n}\"\n      target: \"self\"\n",
+        "ruleName": "Tests: Add test prefix to test methods",
+        "ruleID": "9251e2fc-0dc4-4ae7-b310-47d1e5e09df7",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "Add test prefix to test methods",
+        "ruleErrorLevel": 2,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  instanceCreation:\n    type:\n      reference: java.util.Random\n      checkInheritance: false\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Use SecureRandom instead\"\n  actions:\n  - rewrite:\n      to: \"new java.security.SecureRandom()\"\n  - modifyAssignedVariable:\n      type: \"java.security.SecureRandom\"\n",
+        "ruleName": "Security: Use SecureRandom instead of Random",
+        "category": "crypto:insecurerandomness",
+        "ruleID": "743bc14a-11cd-4ca3-a101-2af18663ba92",
+        "disableRuleIDs": [],
+        "ruleDescriptionFile": "UseSecureRandominsteadofRandom.html",
+        "ruleShortDescription": "Using Random can lead to predictable randomness",
+        "ruleErrorLevel": 2,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  methodcall:\n    name: println\n    type: PrintStream\n    on:\n      field:\n        in:\n          typeDeclaration:\n            name: java.lang.System\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Use SLF4J log variable\"\n  actions:\n  - addField:\n      field: \"private static final org.slf4j.Logger log \u003d org.slf4j.LoggerFactory.getLogger({{type}}.class);\"\n      target: \"parentClass\"\n  - rewrite:\n      to: \"log.info({{{arguments}}})\"\n",
+        "ruleName": "Logging: Use logg variable instead or System.out.println",
+        "ruleID": "6e4d24d1-2ba5-42a4-9f86-26750321bbc1",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "Use log variable",
+        "ruleErrorLevel": 2,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  typeDeclaration:\n    not:\n      annotation:\n        type: org.springframework.stereotype.Repository\n    name:\n      matches: ^.*Repository$\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Add @Repository annotation\"\n  actions:\n  - addAnnotation:\n      annotation: \"@org.springframework.stereotype.Repository\"\n",
+        "ruleName": "Beans: Annotate with @Repository",
+        "ruleID": "61dede45-61d6-451a-aa95-c9a039fc412e",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "This class looks like the implementation of a Spring Repository.",
+        "ruleErrorLevel": 2,
+        "tags": "",
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  field:\n    allOf:\n    - modifier: \"final\"\n    - modifier: \"static\"\n    name:\n      matches: \"[a-z]+((\\\\d)|([A-Z0-9][a-z0-9]+))*([A-Z])?\"\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Rename this constant to uppercase\"\n  actions:\n  - rewrite:\n      to: \"{{{ modifiers.0 }}} static final {{{ typeElement }}} {{#upperCase}}{{#camelToUnderscoreCase}}{{{\\\n        \\ name }}}{{/camelToUnderscoreCase}}{{/upperCase}} \u003d {{{ assignedExpression\\\n        \\ }}};\"\n",
+        "ruleName": "Refactor: Rename constants to uppercase",
+        "ruleID": "ec003fff-0da8-4132-9039-35a7c5b3dbca",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "Constants should be uppercase ",
+        "ruleErrorLevel": 2,
+        "ruleScope": [],
+        "ruleEnabled": true
+      }
+    },
+    {
+      "type": "947034909c9b08d0b583170e594b0eb327933231",
+      "model": {
+        "yamlCode": "search:\n  annotation:\n    type: \"org.junit.jupiter.api.Disabled\"\n    without:\n      parameters:\n      - {}\n",
+        "mver": 8,
+        "yamlQuickFixCode": "availableFixes:\n- name: \"Add description\"\n  actions:\n  - changeAnnotation:\n      addParameter:\n      - value: \"\\\"//TODO: add a description here\\\"\"\n",
+        "ruleName": "Tests: Add comment when using @Disabled",
+        "ruleID": "8d9df7fa-3517-4e4e-9291-40b27501e914",
+        "disableRuleIDs": [],
+        "ruleShortDescription": "Add comment when using @Disabled annotation",
         "ruleErrorLevel": 2,
         "ruleScope": [],
         "ruleEnabled": true
